@@ -7,7 +7,7 @@ const issue = defineProps(['issue'])
 <template>
   <main>
     <Card>
-      <template #title>{{ issue.issue.id }} - {{ issue.issue.issueType }}</template>
+      <template #title><img v-tooltip="issue.issue.issueType.name" :src="issue.issue.issueType.icon"> {{ issue.issue.id }}</template>
       <template #subtitle>{{ issue.issue.status }}</template>
       <template #content>{{ issue.issue.title }}</template>
     </Card>

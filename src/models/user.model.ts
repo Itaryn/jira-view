@@ -6,7 +6,12 @@ export interface User {
 export interface IssueSummary {
     displayName?: string;
     id: string;
-    issueType: string;
+    issueType: IssueTypeSummary;
     status: string;
     title: string;
+}
+
+export interface IssueTypeSummary {
+    name: string,
+    icon: string
 }
