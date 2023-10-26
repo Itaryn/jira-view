@@ -21,4 +21,9 @@ export interface Status {
 
 export interface Assignee {
     displayName: string;
+    avatarUrls: JiraImages;
+}
+
+export interface JiraImages {
+    "32x32": string;
 }
