@@ -12,6 +12,7 @@ export interface Fields {
 
 export interface IssueType {
     name: string;
+    iconUrl: string;
 }
 
 export interface Status {

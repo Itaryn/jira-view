@@ -4,5 +4,11 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
+import Tooltip from 'primevue/tooltip';
 
-createApp(App).use(PrimeVue).use(ToastService).mount('#app')
+const app = createApp(App)
+
+app.use(PrimeVue).use(ToastService)
+app.directive('tooltip', Tooltip)
+
+app.mount('#app')

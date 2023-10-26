@@ -31,7 +31,10 @@ axios({
          return {
             displayName: issue.fields.assignee.displayName,
             id: issue.key,
-            issueType: issue.fields.issuetype.name,
+            issueType: {
+                name: issue.fields.issuetype.name,
+                icon: issue.fields.issuetype.iconUrl
+            },
             status: issue.fields.status.name,
             title: issue.fields.summary
          } as IssueSummary;
