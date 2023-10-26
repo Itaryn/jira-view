@@ -32,6 +32,7 @@ function loadIssues() {
         const issues = result.data.issues.map((issue: Issue) => {
             return {
                 displayName: issue.fields.assignee.displayName,
+                icon: issue.fields.assignee.avatarUrls['32x32'],
                 id: issue.key,
                 issueType: {
                     name: issue.fields.issuetype.name,
@@ -45,6 +46,7 @@ function loadIssues() {
 
         users.value = Object.entries(groupBy(issues, (issue: IssueSummary) => issue.displayName ?? "")).map(entry => {return {
             displayName: entry[0],
+            icon: entry[1][0].icon,
             issues: entry[1]
         }}).sort((a, b) => a.displayName.localeCompare(b.displayName));
 
@@ -70,7 +72,11 @@ defineExpose({
 <template>
     <main>
      <TabView :scrollable="true">
-      <TabPanel v-for="user in users" :key="user.displayName" :header="user.displayName">
+      <TabPanel v-for="user in users" :key="user.displayName">
+        <template #header>
+            <img class="avatar" :src="user.icon" alt="Avatar" width="32" />
+            <span class="p-tabview-title">{{ user.displayName }}</span>
+        </template>
         <div id="panel-content">
            <div class="column">
               <p>Ouvert</p>
@@ -100,5 +106,9 @@ defineExpose({
    flex-direction: column;
    align-items: center;
    width: 33%;
+}
+
+.avatar {
+    margin-right: 5px;
 }
 </style>
