@@ -4,8 +4,11 @@ This Vue project is made to simplify display of developer actual work in Jira.
 
 ## Customize configuration
 
-Set your Jira server in vite.config.ts (property server.proxy.target).
-Set the FILTER_ID, USER and API_TOKEN in App.vue.
+Set the FILTER_ID, USER and API_TOKEN in .env
+
+### For development
+
+Configure the proxy by set the jira URL in vite.config.ts at server / proxy / '/rest' / target
 
 ## Project Setup
 

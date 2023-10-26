@@ -13,11 +13,6 @@ const openIssues = ["Ouvert", "Rouvert"]
 const inProgressIssues = ["En cours", "Revue technique", "Assurance qualité"]
 const resolvedIssues = ["Résolu", "Fermé"]
 
-const FILTER_ID = "";
-const USER = "";
-const API_TOKEN = "";
-
-
 const groupBy = <T, K extends keyof any>(arr: T[], key: (i: T) => K) =>
   arr.reduce((groups, item) => {
     (groups[key(item)] ||= []).push(item);
@@ -26,9 +21,9 @@ const groupBy = <T, K extends keyof any>(arr: T[], key: (i: T) => K) =>
 
 const users = ref([] as User[]);
 axios({
-      url: "/rest/api/2/search?jql=filter=" + FILTER_ID,
+      url: "/rest/api/2/search?jql=filter=" + import.meta.env.VITE_FILTER_ID,
       method: 'GET',
-      headers: { 'Authorization': 'Basic ' + btoa(USER + ":" + API_TOKEN)}
+      headers: { 'Authorization': 'Basic ' + btoa(import.meta.env.VITE_USER + ":" + import.meta.env.VITE_API_TOKEN)}
    }).then(result => {
       const issues = result.data.issues.map((issue: Issue) => {
          return {
