@@ -1,15 +1,21 @@
 
 <script setup lang="ts">
+import type { StatusGroup } from '@/models/config.model';
+import type { IssueSummary } from '@/models/user.model';
 import Card from 'primevue/card';
-const issue = defineProps(['issue'])
+
+const props = defineProps(['issue', 'group'])
+
+const issue: IssueSummary = props.issue;
+const color: string = (props.group as StatusGroup).statuses.find((status) => status.name === issue.status)?.color ?? "#ffffff";
 </script>
 
 <template>
   <main>
     <Card>
-      <template #title><img v-tooltip="issue.issue.issueType.name" :src="issue.issue.issueType.icon"> {{ issue.issue.id }}</template>
-      <template #subtitle>{{ issue.issue.status }}</template>
-      <template #content>{{ issue.issue.title }}</template>
+      <template #title><img v-tooltip="issue.issueType.name" :src="issue.issueType.icon"> {{ issue.id }}</template>
+      <template #subtitle>{{ issue.status }}</template>
+      <template #content>{{ issue.title }}</template>
     </Card>
   </main>
 </template>
@@ -18,5 +24,9 @@ const issue = defineProps(['issue'])
   main {
     width: 100%;
     padding: 5px;
+  }
+
+  .p-card {
+    background-color: v-bind(color);
   }
 </style>
