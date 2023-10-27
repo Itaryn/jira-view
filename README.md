@@ -2,9 +2,9 @@
 
 This Vue project is made to simplify display of developer actual work in Jira.
 
-## Customize configuration
+## Configuration
 
-Set the FILTER_ID, USER and API_TOKEN in .env
+Set the different properties in the config.json file
 
 ### For development
 

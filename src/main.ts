@@ -11,4 +11,9 @@ const app = createApp(App)
 app.use(PrimeVue).use(ToastService)
 app.directive('tooltip', Tooltip)
 
-app.mount('#app')
+fetch("config.json")
+  .then((response) => response.json())
+  .then((config) => {
+        app.config.globalProperties.config = config
+        app.mount('#app')
+  });

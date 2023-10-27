@@ -9,6 +9,9 @@ import axios from 'axios'
 import { onMounted, ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { groupBy, onlyUnique } from '../helpers/array.helper';
+import { getCurrentInstance } from 'vue'
+
+const config = getCurrentInstance()?.appContext.config.globalProperties.config;
 
 const toast = useToast();
 
@@ -25,9 +28,9 @@ onMounted(() => {
 
 function loadIssues() {
     axios({
-        url: "/rest/api/2/search?jql=filter=" + import.meta.env.VITE_FILTER_ID,
+        url: "/rest/api/2/search?jql=filter=" + config.jira.filter_id,
         method: 'GET',
-        headers: { 'Authorization': 'Basic ' + btoa(import.meta.env.VITE_USER + ":" + import.meta.env.VITE_API_TOKEN)}
+        headers: { 'Authorization': 'Basic ' + btoa(config.jira.user + ":" + config.jira.api_token)}
     }).then(result => {
         const issues = result.data.issues.map((issue: Issue) => {
             return {
