@@ -10,15 +10,15 @@ import { onMounted, ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { groupBy, onlyUnique } from '../helpers/array.helper';
 import { getCurrentInstance } from 'vue'
+import type { Config } from '@/models/config.model';
 
-const config = getCurrentInstance()?.appContext.config.globalProperties.config;
+const config: Config = getCurrentInstance()?.appContext.config.globalProperties.config;
 
 const toast = useToast();
 
-const openIssues = ["Ouvert", "Rouvert"]
-const inProgressIssues = ["En cours", "Revue technique", "Assurance qualité"]
-const resolvedIssues = ["Résolu", "Fermé"]
-const allIssuesStatus = openIssues.concat(inProgressIssues).concat(resolvedIssues);
+const statusGroup = config.jira.status_group;
+const allIssuesStatus = statusGroup.flatMap(group => group.statuses.map(status => status.name));
+const columnSize = 100 / statusGroup.length + '%'
 
 const users = ref([] as User[]);
 
@@ -81,17 +81,9 @@ defineExpose({
             <span class="p-tabview-title">{{ user.displayName }}</span>
         </template>
         <div id="panel-content">
-           <div class="column">
-              <p>Ouvert</p>
-              <IssueCard v-for="issue in user.issues.filter(issue => openIssues.find(a => a === issue.status) != null)" :key="issue.id" :issue="issue"></IssueCard>
-           </div>
-           <div class="column">
-              <p>En cours</p>
-              <IssueCard v-for="issue in user.issues.filter(issue => inProgressIssues.find(a => a === issue.status) != null)" :key="issue.id" :issue="issue"></IssueCard>
-           </div>
-           <div class="column">
-              <p>Terminé</p>
-              <IssueCard v-for="issue in user.issues.filter(issue => resolvedIssues.find(a => a === issue.status) != null)" :key="issue.id" :issue="issue"></IssueCard>
+           <div v-for="group in statusGroup" :key="group.name" class="column">
+              <h2>{{ group.name }}</h2>
+              <IssueCard v-for="issue in user.issues.filter(issue => group.statuses.find(status => status.name === issue.status) != null)" :key="issue.id" :issue="issue" :group="group"></IssueCard>
            </div>
         </div>
       </TabPanel>
@@ -102,13 +94,14 @@ defineExpose({
 <style scoped>
 #panel-content {
    display: flex;
+   justify-content: space-between;
 }
 
 .column {
    display: flex;
    flex-direction: column;
    align-items: center;
-   width: 33%;
+   width: v-bind(columnSize);
 }
 
 .avatar {

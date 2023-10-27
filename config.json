@@ -2,6 +2,14 @@
     "jira": {
         "filter_id": 0,
         "user": "",
-        "api_token": ""
+        "api_token": "",
+        "status_group": [
+            {
+                "name": "Default",
+                "statuses": [
+                    { "name": "Open", "color": "#000000"}
+                ]
+            }
+        ]
     }
 }
