@@ -26,9 +26,9 @@ onMounted(() => {
     loadIssues();
 })
 
-function loadIssues() {
+function loadIssues(start: number = 0) {
     axios({
-        url: "/rest/api/2/search?jql=filter=" + config.jira.filter_id,
+        url: `/rest/api/2/search?jql=filter=${config.jira.filter_id}&maxResults=${config.jira.max_results}&startAt=${start}`,
         method: 'GET',
         headers: { 'Authorization': 'Basic ' + btoa(config.jira.user + ":" + config.jira.api_token)}
     }).then(result => {
@@ -44,23 +44,41 @@ function loadIssues() {
                 status: issue.fields.status.name,
                 title: issue.fields.summary
             } as IssueSummary;
-        
         });
 
-        users.value = Object.entries(groupBy(issues, (issue: IssueSummary) => issue.displayName ?? "")).map(entry => {return {
+        const byUsers = Object.entries(groupBy(issues, (issue: IssueSummary) => issue.displayName ?? "")).map(entry => {return {
             displayName: entry[0],
             icon: entry[1][0].icon,
             issues: entry[1]
         }}).sort((a, b) => a.displayName.localeCompare(b.displayName));
 
-        toast.add({ severity: 'success', summary: 'Issues loaded', detail: issues.length + ' issues loaded inside board.', life: 3000 });
+        if (start === 0) {
+            users.value = byUsers;
+        } else {
+            byUsers.forEach(user => {
+                const userPresent = users.value.find(u => u.displayName === user.displayName);
+                if (userPresent === undefined) {
+                    users.value.push(user);
+                } else {
+                    userPresent.issues = userPresent.issues.concat(user.issues);
+                };
+            });
+        }
 
-        const missingTypes = issues
-            .filter((issue: IssueSummary) => allIssuesStatus.find((status: string) => issue.status === status) === undefined)
-            .map((issue: IssueSummary) => issue.status)
-            .filter(onlyUnique);
-        if (missingTypes.length > 0) {
-            toast.add({ severity: 'warn', summary: 'Issue type missing', detail: `The type${missingTypes.length > 1 ? 's' : ''} '${missingTypes.join("', '")}' ${missingTypes.length > 1 ? 'are' : 'is'} missing.` })
+        if (result.data.total > result.data.startAt + result.data.maxResults) {
+            loadIssues(start + config.jira.max_results);
+        } else {
+            const allIssues = users.value.flatMap(user => user.issues);
+
+            toast.add({ severity: 'success', summary: 'Issues loaded', detail: allIssues.length + ' issues loaded inside board.', life: 3000 });
+
+            const missingTypes = allIssues
+                .filter((issue: IssueSummary) => allIssuesStatus.find((status: string) => issue.status === status) === undefined)
+                .map((issue: IssueSummary) => issue.status)
+                .filter(onlyUnique);
+            if (missingTypes.length > 0) {
+                toast.add({ severity: 'warn', summary: 'Issue type missing', detail: `The type${missingTypes.length > 1 ? 's' : ''} '${missingTypes.join("', '")}' ${missingTypes.length > 1 ? 'are' : 'is'} missing.` })
+            }
         }
     }).catch(error => {
         toast.add({ severity: 'error', summary: 'Error when getting tasks', detail: error});
@@ -83,7 +101,7 @@ defineExpose({
         <div id="panel-content">
            <div v-for="group in statusGroup" :key="group.name" class="column">
               <h2>{{ group.name }}</h2>
-              <IssueCard v-for="issue in user.issues.filter(issue => group.statuses.find(status => status.name === issue.status) != null)" :key="issue.id" :issue="issue" :group="group"></IssueCard>
+              <IssueCard v-for="issue in user.issues.filter(issue => group.statuses.find(status => status.name === issue.status) != null).sort((a, b) => a.status.localeCompare(b.status))" :key="issue.id" :issue="issue" :group="group"></IssueCard>
            </div>
         </div>
       </TabPanel>

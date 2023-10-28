@@ -4,6 +4,7 @@ export interface Config {
 
 export interface ConfigJira {
     filter_id: number;
+    max_results: number;
     user: string;
     api_token: string;
     status_group: StatusGroup[];
