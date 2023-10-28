@@ -1,6 +1,7 @@
 {
     "jira": {
         "filter_id": 0,
+        "max_results": 50,
         "user": "",
         "api_token": "",
         "status_group": [
