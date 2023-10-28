@@ -95,6 +95,7 @@ defineExpose({
 #panel-content {
    display: flex;
    justify-content: space-between;
+   gap: 10px;
 }
 
 .column {
@@ -106,5 +107,10 @@ defineExpose({
 
 .avatar {
     margin-right: 5px;
+}
+
+:deep(.p-tabview-nav-container) {
+    position: sticky;
+    top: 0;
 }
 </style>
