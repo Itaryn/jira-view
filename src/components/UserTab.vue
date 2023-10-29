@@ -1,108 +1,43 @@
 
 <script setup lang="ts">
-import { type Issue } from '../models/issue.model';
-import { type User, type IssueSummary } from '../models/user.model';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import IssueCard from './IssueCard.vue';
-import axios from 'axios'
-import { onMounted, ref } from 'vue';
-import { useToast } from 'primevue/usetoast';
-import { groupBy, onlyUnique } from '../helpers/array.helper';
-import { getCurrentInstance } from 'vue'
-import type { Config } from '@/models/config.model';
+import { type IssueSummary } from '../models/user.model';
+import type { Status, StatusGroup } from '@/models/config.model';
+import { onUpdated, ref } from 'vue';
 
-const config: Config = getCurrentInstance()?.appContext.config.globalProperties.config;
-
-const toast = useToast();
-
-const statusGroup = config.jira.status_group;
-const allIssuesStatus = statusGroup.flatMap(group => group.statuses.map(status => status.name));
-const columnSize = 100 / statusGroup.length + '%'
-
-const users = ref([] as User[]);
-
-onMounted(() => {
-    loadIssues();
-})
-
-function loadIssues(start: number = 0) {
-    axios({
-        url: `/rest/api/2/search?jql=filter=${config.jira.filter_id}&maxResults=${config.jira.max_results}&startAt=${start}`,
-        method: 'GET',
-        headers: { 'Authorization': 'Basic ' + btoa(config.jira.user + ":" + config.jira.api_token)}
-    }).then(result => {
-        const issues = result.data.issues.map((issue: Issue) => {
+function getStatusGroupFilterd(statusGroup: StatusGroup[], selectedStatus: Status[]) {
+    return (statusGroup as StatusGroup[]).map(group => {
             return {
-                displayName: issue.fields.assignee.displayName,
-                icon: issue.fields.assignee.avatarUrls['32x32'],
-                id: issue.key,
-                link: `${issue.self.substring(0, issue.self.indexOf('.net/') + 5)}browse/${issue.key}`,
-                issueType: {
-                    name: issue.fields.issuetype.name,
-                    icon: issue.fields.issuetype.iconUrl
-                },
-                status: issue.fields.status.name,
-                title: issue.fields.summary
-            } as IssueSummary;
-        });
-
-        const byUsers = Object.entries(groupBy(issues, (issue: IssueSummary) => issue.displayName ?? "")).map(entry => {return {
-            displayName: entry[0],
-            icon: entry[1][0].icon,
-            issues: entry[1]
-        }}).sort((a, b) => a.displayName.localeCompare(b.displayName));
-
-        if (start === 0) {
-            users.value = byUsers;
-        } else {
-            byUsers.forEach(user => {
-                const userPresent = users.value.find(u => u.displayName === user.displayName);
-                if (userPresent === undefined) {
-                    users.value.push(user);
-                } else {
-                    userPresent.issues = userPresent.issues.concat(user.issues);
-                };
-            });
-        }
-
-        if (result.data.total > result.data.startAt + result.data.maxResults) {
-            loadIssues(start + config.jira.max_results);
-        } else {
-            const allIssues = users.value.flatMap(user => user.issues);
-
-            toast.add({ severity: 'success', summary: 'Issues loaded', detail: allIssues.length + ' issues loaded inside board.', life: 3000 });
-
-            const missingTypes = allIssues
-                .filter((issue: IssueSummary) => allIssuesStatus.find((status: string) => issue.status === status) === undefined)
-                .map((issue: IssueSummary) => issue.status)
-                .filter(onlyUnique);
-            if (missingTypes.length > 0) {
-                toast.add({ severity: 'warn', summary: 'Issue type missing', detail: `The type${missingTypes.length > 1 ? 's' : ''} '${missingTypes.join("', '")}' ${missingTypes.length > 1 ? 'are' : 'is'} missing.` })
-            }
-        }
-    }).catch(error => {
-        toast.add({ severity: 'error', summary: 'Error when getting tasks', detail: error});
-    });
+                name: group.name,
+                statuses: group.statuses.filter(status => selectedStatus?.find((selectedStatus: Status) => selectedStatus.name === status.name) !== undefined)
+            } as StatusGroup
+        }).filter(group => group.statuses.length > 0)
 }
 
-defineExpose({
-  loadIssues
-});
+const props = defineProps(['users', 'statusGroup', 'selectedStatus']);
+const statusGroupFiltered = ref();
+const columnSize = ref();
+
+onUpdated(() => {
+    statusGroupFiltered.value = getStatusGroupFilterd(props.statusGroup, props.selectedStatus);
+    columnSize.value = 100 / statusGroupFiltered.value.length + '%';
+})
 </script>
 
 <template>
     <main>
      <TabView :scrollable="true">
-      <TabPanel v-for="user in users" :key="user.displayName">
+      <TabPanel v-for="user in props.users" :key="user.displayName">
         <template #header>
             <img class="avatar" :src="user.icon" alt="Avatar" width="32" />
             <span class="p-tabview-title">{{ user.displayName }}</span>
         </template>
         <div id="panel-content">
-           <div v-for="group in statusGroup" :key="group.name" class="column">
+           <div v-for="group in statusGroupFiltered" :key="group.name" class="column">
               <h2>{{ group.name }}</h2>
-              <IssueCard v-for="issue in user.issues.filter(issue => group.statuses.find(status => status.name === issue.status) != null).sort((a, b) => a.status.localeCompare(b.status))" :key="issue.id" :issue="issue" :group="group"></IssueCard>
+              <IssueCard v-for="issue in user.issues.filter((issue: IssueSummary) => group.statuses.find((status: Status) => status.name === issue.status) != null).sort((a: IssueSummary, b: IssueSummary) => a.status.localeCompare(b.status))" :key="issue.id" :issue="issue" :group="group"></IssueCard>
            </div>
         </div>
       </TabPanel>
