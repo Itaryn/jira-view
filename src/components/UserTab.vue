@@ -37,6 +37,7 @@ function loadIssues(start: number = 0) {
                 displayName: issue.fields.assignee.displayName,
                 icon: issue.fields.assignee.avatarUrls['32x32'],
                 id: issue.key,
+                link: `${issue.self.substring(0, issue.self.indexOf('.net/') + 5)}browse/${issue.key}`,
                 issueType: {
                     name: issue.fields.issuetype.name,
                     icon: issue.fields.issuetype.iconUrl

@@ -1,6 +1,7 @@
 export interface Issue {
     fields: Fields;
     key: string;
+    self: string;
 }
 
 export interface Fields {
