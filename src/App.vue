@@ -3,6 +3,7 @@
 import Toast from 'primevue/toast';
 import Button from 'primevue/button';
 import MultiSelect from 'primevue/multiselect';
+import SelectButton from 'primevue/selectbutton';
 import UserTab from './components/UserTab.vue';
 import { type Issue } from './models/issue.model';
 import { type IssueSummary, type User } from './models/user.model';
@@ -10,7 +11,7 @@ import axios from 'axios'
 import { getCurrentInstance, onMounted, ref } from 'vue';
 import { groupBy, onlyUnique } from './helpers/array.helper';
 import { useToast } from 'primevue/usetoast';
-import type { Config, Status, StatusGroup } from './models/config.model';
+import type { Config } from './models/config.model';
 const toast = useToast();
 
 const config: Config = getCurrentInstance()?.appContext.config.globalProperties.config;
@@ -20,6 +21,11 @@ const allIssuesStatus = statusGroup.flatMap(group => group.statuses.map(status =
 
 const users = ref([] as User[]);
 const selectedStatus = ref(statusGroup.flatMap(group => group.statuses));
+const selectedMode = ref({ "name": "By user" });
+const modes = ref([
+    { "name": "By user" },
+    { "name": "By issue" }
+])
 
 onMounted(() => {
     loadIssues();
@@ -96,8 +102,9 @@ function loadIssues(start: number = 0) {
           {{ slotProps.option.name }}
       </template>
     </MultiSelect>
-      <label for="filter-status">Filter status</label>
+    <label for="filter-status">Filter status</label>
   </span>
+  <SelectButton v-model="selectedMode" :options="modes" optionLabel="name" />
   </header>
   <UserTab :users="users" :statusGroup="statusGroup" :selectedStatus="selectedStatus"></UserTab> 
 </template>
