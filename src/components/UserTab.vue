@@ -17,8 +17,8 @@ function getStatusGroupFilterd(statusGroup: StatusGroup[], selectedStatus: Statu
 }
 
 const props = defineProps(['users', 'statusGroup', 'selectedStatus']);
-const statusGroupFiltered = ref();
-const columnSize = ref();
+const statusGroupFiltered = ref(getStatusGroupFilterd(props.statusGroup, props.selectedStatus));
+const columnSize = ref(100 / statusGroupFiltered.value.length + '%');
 
 onUpdated(() => {
     statusGroupFiltered.value = getStatusGroupFilterd(props.statusGroup, props.selectedStatus);

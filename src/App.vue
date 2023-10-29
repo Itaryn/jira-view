@@ -5,6 +5,7 @@ import Button from 'primevue/button';
 import MultiSelect from 'primevue/multiselect';
 import SelectButton from 'primevue/selectbutton';
 import UserTab from './components/UserTab.vue';
+import IssueTab from './components/IssueTab.vue';
 import { type Issue } from './models/issue.model';
 import { type IssueSummary, type User } from './models/user.model';
 import axios from 'axios'
@@ -106,7 +107,10 @@ function loadIssues(start: number = 0) {
   </span>
   <SelectButton v-model="selectedMode" :options="modes" optionLabel="name" />
   </header>
-  <UserTab :users="users" :statusGroup="statusGroup" :selectedStatus="selectedStatus"></UserTab> 
+  <main>
+    <UserTab v-if="selectedMode.name === 'By user'" :users="users" :statusGroup="statusGroup" :selectedStatus="selectedStatus"></UserTab>
+    <IssueTab v-if="selectedMode.name === 'By issue'" :users="users" :statusGroup="statusGroup" :selectedStatus="selectedStatus"></IssueTab>
+  </main>
 </template>
 
 <style scoped>
