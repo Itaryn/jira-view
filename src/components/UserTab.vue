@@ -3,9 +3,10 @@
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import IssueCard from './IssueCard.vue';
-import { type IssueSummary } from '../models/user.model';
+import { type IssueSummary, type User } from '../models/user.model';
 import type { Status, StatusGroup } from '@/models/config.model';
 import { onUpdated, ref } from 'vue';
+import { groupBy } from '@/helpers/array.helper';
 
 function getStatusGroupFilterd(statusGroup: StatusGroup[], selectedStatus: Status[]) {
     return (statusGroup as StatusGroup[]).map(group => {
@@ -16,11 +17,21 @@ function getStatusGroupFilterd(statusGroup: StatusGroup[], selectedStatus: Statu
         }).filter(group => group.statuses.length > 0)
 }
 
-const props = defineProps(['users', 'statusGroup', 'selectedStatus']);
+const props = defineProps(['issues', 'statusGroup', 'selectedStatus', 'loading']);
 const statusGroupFiltered = ref(getStatusGroupFilterd(props.statusGroup, props.selectedStatus));
 const columnSize = ref(100 / statusGroupFiltered.value.length + '%');
+const users = ref([] as User[])
 
 onUpdated(() => {
+    if (props.loading == false) {
+        console.log("loaded, charge use !")
+        users.value = Object.entries(groupBy(props.issues, (issue: IssueSummary) => issue.displayName ?? "")).map(entry => {return {
+            displayName: entry[0],
+            icon: entry[1][0].icon,
+            issues: entry[1]
+        }}).sort((a, b) => a.displayName.localeCompare(b.displayName));
+    }
+
     statusGroupFiltered.value = getStatusGroupFilterd(props.statusGroup, props.selectedStatus);
     columnSize.value = 100 / statusGroupFiltered.value.length + '%';
 })
@@ -29,7 +40,7 @@ onUpdated(() => {
 <template>
     <main>
      <TabView :scrollable="true">
-      <TabPanel v-for="user in props.users" :key="user.displayName">
+      <TabPanel v-for="user in users" :key="user.displayName">
         <template #header>
             <img class="avatar" :src="user.icon" alt="Avatar" width="32" />
             <span class="p-tabview-title">{{ user.displayName }}</span>
