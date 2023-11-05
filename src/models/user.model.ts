@@ -11,9 +11,17 @@ export interface IssueSummary {
     issueType: IssueTypeSummary;
     status: string;
     title: string;
+    parent?: ParentSummary;
+    children?: IssueSummary[];
 }
 
 export interface IssueTypeSummary {
-    name: string,
-    icon: string
+    name: string;
+    icon: string;
+    hierarchyLevel: number;
+}
+
+export interface ParentSummary {
+    self: string;
+    id: string;
 }

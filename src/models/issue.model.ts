@@ -9,11 +9,14 @@ export interface Fields {
     issuetype: IssueType;
     status: Status;
     summary: string;
+    parent: Parent;
+    subtasks?: Issue[];
 }
 
 export interface IssueType {
     name: string;
     iconUrl: string;
+    hierarchyLevel: number;
 }
 
 export interface Status {
@@ -27,4 +30,10 @@ export interface Assignee {
 
 export interface JiraImages {
     "32x32": string;
+}
+
+export interface Parent {
+    self: string;
+    key: string;
+    fields: Fields;
 }

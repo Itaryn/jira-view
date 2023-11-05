@@ -7,10 +7,11 @@ import SelectButton from 'primevue/selectbutton';
 import UserTab from './components/UserTab.vue';
 import IssueTab from './components/IssueTab.vue';
 import { type Issue } from './models/issue.model';
-import { type IssueSummary, type User } from './models/user.model';
+import { type IssueSummary } from './models/user.model';
 import axios from 'axios'
 import { getCurrentInstance, onMounted, ref } from 'vue';
-import { groupBy, onlyUnique } from './helpers/array.helper';
+import { onlyUnique } from './helpers/array.helper';
+import { toIssueSummary } from './services/jira.service';
 import { useToast } from 'primevue/usetoast';
 import type { Config } from './models/config.model';
 const toast = useToast();
@@ -44,20 +45,7 @@ function loadIssues(start: number = 0) {
         method: 'GET',
         headers: { 'Authorization': 'Basic ' + btoa(config.jira.user + ":" + config.jira.api_token)}
     }).then(result => {
-        issues.value = issues.value.concat(result.data.issues.map((issue: Issue) => {
-            return {
-                displayName: issue.fields.assignee.displayName,
-                icon: issue.fields.assignee.avatarUrls['32x32'],
-                id: issue.key,
-                link: `${issue.self.substring(0, issue.self.indexOf('.net/') + 5)}browse/${issue.key}`,
-                issueType: {
-                    name: issue.fields.issuetype.name,
-                    icon: issue.fields.issuetype.iconUrl
-                },
-                status: issue.fields.status.name,
-                title: issue.fields.summary
-            } as IssueSummary;
-        }));
+        issues.value = issues.value.concat(result.data.issues.map((issue: Issue) => toIssueSummary(issue)));
 
         if (result.data.total > result.data.startAt + result.data.maxResults) {
             loadIssues(start + config.jira.max_results);
@@ -97,8 +85,8 @@ function loadIssues(start: number = 0) {
   <SelectButton v-model="selectedMode" :options="modes" optionLabel="name" />
   </header>
   <main>
-    <UserTab v-if="selectedMode.name === 'By user'" :issues="issues" :statusGroup="statusGroup" :selectedStatus="selectedStatus" :loading="loading"></UserTab>
-    <IssueTab v-if="selectedMode.name === 'By issue'" :issues="issues" :statusGroup="statusGroup" :selectedStatus="selectedStatus" :loading="loading"></IssueTab>
+    <UserTab v-if="selectedMode.name === 'By user' && !loading" :issues="issues" :statusGroup="statusGroup" :selectedStatus="selectedStatus" :loading="loading"></UserTab>
+    <IssueTab v-if="selectedMode.name === 'By issue' && !loading" :issues="issues" :statusGroup="statusGroup" :selectedStatus="selectedStatus" :loading="loading"></IssueTab>
   </main>
 </template>
 
