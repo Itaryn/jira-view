@@ -41,7 +41,7 @@ function loadIssues(start: number = 0) {
     }
 
     axios({
-        url: `/rest/api/2/search?jql=filter=${config.jira.filter_id}&maxResults=${config.jira.max_results}&startAt=${start}`,
+        url: `/rest/api/2/search?jql=filter=${config.jira.filter_id}&maxResults=${config.jira.max_results}&startAt=${start}&expand=changelog`,
         method: 'GET',
         headers: { 'Authorization': 'Basic ' + btoa(config.jira.user + ":" + config.jira.api_token)}
     }).then(result => {
@@ -55,8 +55,8 @@ function loadIssues(start: number = 0) {
             toast.add({ severity: 'success', summary: 'Issues loaded', detail: issues.value.length + ' issues loaded inside board.', life: 3000 });
 
             const missingTypes = issues.value
-                .filter((issue: IssueSummary) => allIssuesStatus.find((status: string) => issue.status === status) === undefined)
-                .map((issue: IssueSummary) => issue.status)
+                .filter((issue: IssueSummary) => allIssuesStatus.find((status: string) => issue.status.name === status) === undefined)
+                .map((issue: IssueSummary) => issue.status.name)
                 .filter(onlyUnique);
                 
             if (missingTypes.length > 0) {

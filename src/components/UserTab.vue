@@ -45,7 +45,7 @@ onMounted(() => {
         <div id="panel-content">
            <div v-for="group in statusGroupFiltered" :key="group.name" class="column">
               <h2>{{ group.name }}</h2>
-              <IssueCard v-for="issue in user.issues.filter((issue: IssueSummary) => group.statuses.find((status: Status) => status.name === issue.status) != null).sort((a: IssueSummary, b: IssueSummary) => a.status.localeCompare(b.status))" :key="issue.id" :issue="issue" :group="group"></IssueCard>
+              <IssueCard v-for="issue in user.issues.filter((issue: IssueSummary) => group.statuses.find((status: Status) => status.name === issue.status.name) != null).sort((a: IssueSummary, b: IssueSummary) => a.status.name.localeCompare(b.status.name))" :key="issue.id" :issue="issue" :group="group"></IssueCard>
            </div>
         </div>
       </TabPanel>

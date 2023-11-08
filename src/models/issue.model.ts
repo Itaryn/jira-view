@@ -2,6 +2,7 @@ export interface Issue {
     fields: Fields;
     key: string;
     self: string;
+    changelog?: Changelog;
 }
 
 export interface Fields {
@@ -11,6 +12,19 @@ export interface Fields {
     summary: string;
     parent: Parent;
     subtasks?: Issue[];
+}
+
+export interface Changelog {
+    histories: History[]
+}
+
+export interface History {
+    items: HistoryItem[]
+    created: string;
+}
+
+export interface HistoryItem {
+    field: string;
 }
 
 export interface IssueType {

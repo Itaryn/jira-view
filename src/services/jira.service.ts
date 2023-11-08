@@ -12,7 +12,10 @@ export function toIssueSummary(issue: Issue): IssueSummary {
             icon: issue.fields.issuetype.iconUrl,
             hierarchyLevel: issue.fields.issuetype.hierarchyLevel
         },
-        status: issue.fields.status.name,
+        status: {
+            name: issue.fields.status.name,
+            lastUpdate: new Date(issue.changelog?.histories.find(change => change.items.some(item => item.field === "status"))?.created ?? new Date())
+        },
         title: issue.fields.summary,
         parent: {
             self: issue.fields.parent?.self.substring(issue.fields.parent?.self.indexOf('.net/') + 5),

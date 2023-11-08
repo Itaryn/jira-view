@@ -55,6 +55,7 @@ async function formatIssues(): Promise<void> {
 </script>
 
 <template>
+<Task></Task>
 </template>
 
 <style scoped>
