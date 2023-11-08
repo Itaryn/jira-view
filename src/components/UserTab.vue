@@ -3,11 +3,12 @@
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import IssueCard from './IssueCard.vue';
-import { type IssueSummary } from '../models/user.model';
+import { type IssueSummary, type User } from '../models/user.model';
 import type { Status, StatusGroup } from '@/models/config.model';
-import { onUpdated, ref } from 'vue';
+import { onMounted, onUpdated, ref } from 'vue';
+import { groupBy } from '@/helpers/array.helper';
 
-function getStatusGroupFilterd(statusGroup: StatusGroup[], selectedStatus: Status[]) {
+function getStatusGroupFiltered(statusGroup: StatusGroup[], selectedStatus: Status[]) {
     return (statusGroup as StatusGroup[]).map(group => {
             return {
                 name: group.name,
@@ -16,12 +17,19 @@ function getStatusGroupFilterd(statusGroup: StatusGroup[], selectedStatus: Statu
         }).filter(group => group.statuses.length > 0)
 }
 
-const props = defineProps(['users', 'statusGroup', 'selectedStatus']);
-const statusGroupFiltered = ref();
-const columnSize = ref();
+const props = defineProps(['issues', 'statusGroup', 'selectedStatus', 'loading']);
+const statusGroupFiltered = ref(getStatusGroupFiltered(props.statusGroup, props.selectedStatus));
+const columnSize = ref(100 / statusGroupFiltered.value.length + '%');
+const users = ref([] as User[])
 
-onUpdated(() => {
-    statusGroupFiltered.value = getStatusGroupFilterd(props.statusGroup, props.selectedStatus);
+onMounted(() => {
+    users.value = Object.entries(groupBy(props.issues, (issue: IssueSummary) => issue.displayName ?? "")).map(entry => {return {
+        displayName: entry[0],
+        icon: entry[1][0].icon,
+        issues: entry[1]
+    }}).sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+    statusGroupFiltered.value = getStatusGroupFiltered(props.statusGroup, props.selectedStatus);
     columnSize.value = 100 / statusGroupFiltered.value.length + '%';
 })
 </script>
@@ -29,7 +37,7 @@ onUpdated(() => {
 <template>
     <main>
      <TabView :scrollable="true">
-      <TabPanel v-for="user in props.users" :key="user.displayName">
+      <TabPanel v-for="user in users" :key="user.displayName">
         <template #header>
             <img class="avatar" :src="user.icon" alt="Avatar" width="32" />
             <span class="p-tabview-title">{{ user.displayName }}</span>
@@ -37,7 +45,7 @@ onUpdated(() => {
         <div id="panel-content">
            <div v-for="group in statusGroupFiltered" :key="group.name" class="column">
               <h2>{{ group.name }}</h2>
-              <IssueCard v-for="issue in user.issues.filter((issue: IssueSummary) => group.statuses.find((status: Status) => status.name === issue.status) != null).sort((a: IssueSummary, b: IssueSummary) => a.status.localeCompare(b.status))" :key="issue.id" :issue="issue" :group="group"></IssueCard>
+              <IssueCard v-for="issue in user.issues.filter((issue: IssueSummary) => group.statuses.find((status: Status) => status.name === issue.status.name) != null).sort((a: IssueSummary, b: IssueSummary) => a.status.name.localeCompare(b.status.name))" :key="issue.id" :issue="issue" :group="group"></IssueCard>
            </div>
         </div>
       </TabPanel>
