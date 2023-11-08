@@ -82,7 +82,6 @@ function loadIssues(start: number = 0) {
     </MultiSelect>
     <label for="filter-status">Filter status</label>
   </span>
-  <SelectButton v-model="selectedMode" :options="modes" optionLabel="name" />
   </header>
   <main>
     <UserTab v-if="selectedMode.name === 'By user' && !loading" :issues="issues" :statusGroup="statusGroup" :selectedStatus="selectedStatus" :loading="loading"></UserTab>
