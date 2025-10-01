@@ -8,7 +8,8 @@ Set the different properties in the config.json file
 
 ### For development
 
-Configure the proxy by set the jira URL in vite.config.ts at server / proxy / '/rest' / target
+Configure the proxy by set the jira URL in vite.config.ts at: 
+server -> proxy -> '/rest' -> target
 
 ## Project Setup
 

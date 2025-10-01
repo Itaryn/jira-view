@@ -1,53 +1,57 @@
 export interface Issue {
-    fields: Fields;
-    key: string;
-    self: string;
-    changelog?: Changelog;
+  id: string
+  key: string
+  self: string
+  changelog?: Changelog
+}
+
+export interface IssueDetailed extends Issue {
+  fields: Fields
 }
 
 export interface Fields {
-    assignee: Assignee;
-    issuetype: IssueType;
-    status: Status;
-    summary: string;
-    parent: Parent;
-    subtasks?: Issue[];
+  assignee: Assignee
+  issuetype: IssueType
+  status: Status
+  summary: string
+  parent: Parent
+  subtasks?: IssueDetailed[]
 }
 
 export interface Changelog {
-    histories: History[]
+  histories: History[]
 }
 
 export interface History {
-    items: HistoryItem[]
-    created: string;
+  items: HistoryItem[]
+  created: string
 }
 
 export interface HistoryItem {
-    field: string;
+  field: string
 }
 
 export interface IssueType {
-    name: string;
-    iconUrl: string;
-    hierarchyLevel: number;
+  name: string
+  iconUrl: string
+  hierarchyLevel: number
 }
 
 export interface Status {
-    name: string;
+  name: string
 }
 
 export interface Assignee {
-    displayName: string;
-    avatarUrls: JiraImages;
+  displayName: string
+  avatarUrls: JiraImages
 }
 
 export interface JiraImages {
-    "32x32": string;
+  '32x32': string
 }
 
 export interface Parent {
-    self: string;
-    key: string;
-    fields: Fields;
+  self: string
+  key: string
+  fields: Fields
 }
